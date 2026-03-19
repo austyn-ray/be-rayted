@@ -47,7 +47,13 @@ export default function Vote() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'comics' }, fetchAll)
       .subscribe()
 
-    return () => supabase.removeChannel(channel)
+    // Poll every 5 seconds to catch sort_order changes
+    const poll = setInterval(fetchAll, 5000)
+
+    return () => {
+      supabase.removeChannel(channel)
+      clearInterval(poll)
+    }
   }, [respondentId])
 
   useEffect(() => {
@@ -218,19 +224,19 @@ export default function Vote() {
         .container {
           max-width: 480px;
           margin: 0 auto;
-          padding: 2rem 1.5rem;
+          padding: 1rem 1.25rem;
           min-height: 100vh;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 1.5rem;
+          gap: 0.75rem;
         }
-        .logo-wrap { width: 200px; }
+        .logo-wrap { width: 150px; }
         .logo { width: 100%; height: auto; }
         .tagline {
           font-family: 'Bangers', cursive;
-          font-size: 1rem;
+          font-size: 0.85rem;
           letter-spacing: 0.15em;
           color: #888;
           text-align: center;
@@ -240,8 +246,8 @@ export default function Vote() {
           background: #1a1a1a;
           border: 1px solid #2a2a2a;
           border-radius: 1.25rem;
-          padding: 2.5rem 2rem;
-          min-height: 280px;
+          padding: 1.5rem 1.25rem;
+          min-height: 240px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -272,19 +278,19 @@ export default function Vote() {
           text-transform: uppercase;
           letter-spacing: 0.2em;
           color: #ffaa00;
-          margin-bottom: 0.4rem;
+          margin-bottom: 0.25rem;
         }
         .comic-name {
           font-family: 'Bangers', cursive;
-          font-size: 2.2rem;
+          font-size: 2rem;
           letter-spacing: 0.05em;
-          margin-bottom: 1.75rem;
+          margin-bottom: 1.25rem;
         }
         .rating-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          gap: 0.6rem;
-          margin-bottom: 1.25rem;
+          gap: 0.5rem;
+          margin-bottom: 0.75rem;
         }
         .rating-btn {
           background: #222;
