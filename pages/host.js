@@ -105,12 +105,12 @@ export default function Host() {
       <Head>
         <title>Be Rayted — Host Dashboard</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Bangers&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
       </Head>
 
       <div className="container">
         <div className="header">
-          <div className="logo">BE RAYTED</div>
+          <img src="/logo.png" alt="Be Rayted" className="logo-img" />
           <div className="tagline">Host Dashboard</div>
         </div>
 
@@ -210,38 +210,31 @@ export default function Host() {
           gap: 1.5rem;
         }
         .header { text-align: center; margin-bottom: 0.5rem; }
-        .logo {
-          font-family: 'Black Han Sans', sans-serif;
-          font-size: 2.5rem;
-          background: linear-gradient(135deg, #ff3c00, #ffcc00);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-        .tagline { color: #555; font-size: 0.8rem; letter-spacing: 0.15em; text-transform: uppercase; }
+        .logo-img { width: 140px; height: auto; }
+        .tagline { color: #555; font-size: 0.8rem; letter-spacing: 0.15em; text-transform: uppercase; margin-top: 0.5rem; }
         .winner-banner {
-          background: linear-gradient(135deg, rgba(255,200,0,0.15), rgba(255,60,0,0.1));
-          border: 1px solid rgba(255,200,0,0.3);
+          background: linear-gradient(135deg, rgba(255,170,0,0.15), rgba(255,119,0,0.1));
+          border: 1px solid rgba(255,170,0,0.3);
           border-radius: 0.75rem;
           padding: 1rem 1.25rem;
           font-size: 0.95rem;
-          color: #ffcc00;
+          color: #ffaa00;
         }
         .active-banner {
-          background: rgba(255,60,0,0.1);
-          border: 1px solid rgba(255,60,0,0.3);
+          background: rgba(255,170,0,0.1);
+          border: 1px solid rgba(255,170,0,0.3);
           border-radius: 0.75rem;
           padding: 1rem 1.25rem;
           font-size: 0.95rem;
-          color: #ff6a00;
+          color: #ffaa00;
           display: flex;
           align-items: center;
           justify-content: space-between;
         }
         .close-btn {
-          background: rgba(255,60,0,0.2);
-          border: 1px solid rgba(255,60,0,0.4);
-          color: #ff3c00;
+          background: rgba(255,170,0,0.2);
+          border: 1px solid rgba(255,170,0,0.4);
+          color: #ffaa00;
           padding: 0.3rem 0.75rem;
           border-radius: 0.4rem;
           cursor: pointer;
@@ -255,9 +248,9 @@ export default function Host() {
           padding: 1.5rem;
         }
         .section-title {
-          font-family: 'Black Han Sans', sans-serif;
-          font-size: 1rem;
-          letter-spacing: 0.05em;
+          font-family: 'Bangers', cursive;
+          font-size: 1.1rem;
+          letter-spacing: 0.08em;
           color: #888;
           text-transform: uppercase;
           margin-bottom: 1rem;
@@ -274,14 +267,14 @@ export default function Host() {
           padding: 0.65rem 1rem;
           outline: none;
         }
-        .input:focus { border-color: #ff3c00; }
+        .input:focus { border-color: #ffaa00; }
         .btn-primary {
-          background: #ff3c00;
+          background: linear-gradient(135deg, #ffaa00, #ff7700);
           border: none;
           border-radius: 0.6rem;
-          color: #fff;
-          font-family: 'Black Han Sans', sans-serif;
-          font-size: 0.95rem;
+          color: #000;
+          font-family: 'Bangers', cursive;
+          font-size: 1rem;
           padding: 0.65rem 1.25rem;
           cursor: pointer;
           letter-spacing: 0.05em;
@@ -298,27 +291,27 @@ export default function Host() {
           gap: 0.75rem;
           transition: border-color 0.2s;
         }
-        .comic-row.active { border-color: #ff3c00; background: rgba(255,60,0,0.05); }
+        .comic-row.active { border-color: #ffaa00; background: rgba(255,170,0,0.05); }
         .comic-info { display: flex; align-items: center; gap: 0.6rem; flex: 1; min-width: 0; }
         .comic-number { color: #444; font-size: 0.8rem; min-width: 1.2rem; }
         .comic-name { font-weight: 500; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .live-badge {
-          background: #ff3c00;
-          color: #fff;
+          background: #ffaa00;
+          color: #000;
           font-size: 0.6rem;
-          font-family: 'Black Han Sans', sans-serif;
+          font-family: 'Bangers', cursive;
           letter-spacing: 0.1em;
           padding: 0.2rem 0.4rem;
           border-radius: 0.25rem;
         }
         .comic-stats { display: flex; flex-direction: column; align-items: flex-end; min-width: 60px; }
-        .stat { font-family: 'Black Han Sans', sans-serif; font-size: 1rem; color: #ffcc00; }
+        .stat { font-family: 'Bangers', cursive; font-size: 1rem; color: #ffaa00; }
         .stat-count { font-size: 0.7rem; color: #555; }
         .comic-actions { display: flex; gap: 0.4rem; align-items: center; }
         .btn-activate {
-          background: rgba(255,60,0,0.15);
-          border: 1px solid rgba(255,60,0,0.3);
-          color: #ff3c00;
+          background: rgba(255,170,0,0.15);
+          border: 1px solid rgba(255,170,0,0.3);
+          color: #ffaa00;
           border-radius: 0.5rem;
           padding: 0.35rem 0.7rem;
           font-size: 0.75rem;
@@ -326,11 +319,11 @@ export default function Host() {
           font-family: 'DM Sans', sans-serif;
           white-space: nowrap;
         }
-        .btn-activate:hover { background: rgba(255,60,0,0.25); }
+        .btn-activate:hover { background: rgba(255,170,0,0.25); }
         .btn-deactivate {
-          background: rgba(255,60,0,0.3);
-          border: 1px solid #ff3c00;
-          color: #ff3c00;
+          background: rgba(255,170,0,0.3);
+          border: 1px solid #ffaa00;
+          color: #ffaa00;
           border-radius: 0.5rem;
           padding: 0.35rem 0.7rem;
           font-size: 0.75rem;
@@ -346,7 +339,7 @@ export default function Host() {
           font-size: 0.75rem;
           cursor: pointer;
         }
-        .btn-delete:hover { color: #ff3c00; border-color: #ff3c00; }
+        .btn-delete:hover { color: #ffaa00; border-color: #ffaa00; }
         .btn-clear {
           background: transparent;
           border: 1px solid #2a2a2a;
