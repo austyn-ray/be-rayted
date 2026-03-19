@@ -8,6 +8,7 @@ export default function Host() {
   const [newComicName, setNewComicName] = useState('')
   const [loading, setLoading] = useState(true)
   const [activeComic, setActiveComic] = useState(null)
+  const [confirmClear, setConfirmClear] = useState(false)
 
   useEffect(() => {
     fetchAll()
@@ -71,9 +72,9 @@ export default function Host() {
   }
 
   async function clearNight() {
-    if (!confirm('Clear ALL comics and votes for tonight? This cannot be undone.')) return
     await supabase.from('votes').delete().neq('id', 0)
     await supabase.from('comics').delete().neq('id', 0)
+    setConfirmClear(false)
   }
 
   function getComicStats(comicId) {
@@ -181,7 +182,15 @@ export default function Host() {
           )}
         </div>
 
-        <button className="btn-clear" onClick={clearNight}>Clear Night & Start Fresh</button>
+        {!confirmClear ? (
+          <button className="btn-clear" onClick={() => setConfirmClear(true)}>Clear Night & Start Fresh</button>
+        ) : (
+          <div className="confirm-row">
+            <span className="confirm-text">Are you sure? This clears everything.</span>
+            <button className="btn-confirm-yes" onClick={clearNight}>Yes, Clear</button>
+            <button className="btn-confirm-no" onClick={() => setConfirmClear(false)}>Cancel</button>
+          </div>
+        )}
       </div>
 
       <style jsx global>{`
@@ -350,7 +359,36 @@ export default function Host() {
           width: 100%;
           transition: all 0.2s;
         }
-        .btn-clear:hover { border-color: #ff3c00; color: #ff3c00; }
+        .confirm-row {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          background: #141414;
+          border: 1px solid #ff3c00;
+          border-radius: 0.75rem;
+          padding: 0.75rem 1rem;
+        }
+        .confirm-text { flex: 1; font-size: 0.85rem; color: #ff3c00; }
+        .btn-confirm-yes {
+          background: #ff3c00;
+          border: none;
+          border-radius: 0.5rem;
+          color: #fff;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.85rem;
+          padding: 0.4rem 0.9rem;
+          cursor: pointer;
+        }
+        .btn-confirm-no {
+          background: #1e1e1e;
+          border: 1px solid #2a2a2a;
+          border-radius: 0.5rem;
+          color: #aaa;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.85rem;
+          padding: 0.4rem 0.9rem;
+          cursor: pointer;
+        }
       `}</style>
     </>
   )
