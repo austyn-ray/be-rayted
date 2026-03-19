@@ -50,22 +50,32 @@ export default function Host() {
   }
 
   function handleDragEnter(index) {
-    dragOverItem.current = index
-    const newComics = [...comics]
-    const draggedItem = newComics.splice(dragItem.current, 1)[0]
-    newComics.splice(index, 0, draggedItem)
-    dragItem.current = index
-    setComics(newComics)
+    if (dragItem.current === index) return
+
+    setComics(prev => {
+      const remaining = prev.filter(c => !c.has_performed)
+      const performed = prev.filter(c => c.has_performed)
+
+      const newRemaining = [...remaining]
+      const draggedItem = newRemaining.splice(dragItem.current, 1)[0]
+      newRemaining.splice(index, 0, draggedItem)
+      dragItem.current = index
+
+      return [...newRemaining, ...performed]
+    })
   }
 
   async function handleDragEnd() {
-    // Save new order to Supabase
-    const updates = comics.map((comic, index) =>
-      supabase.from('comics').update({ sort_order: index }).eq('id', comic.id)
-    )
-    await Promise.all(updates)
-    dragItem.current = null
-    dragOverItem.current = null
+    setComics(prev => {
+      const remaining = prev.filter(c => !c.has_performed)
+      const updates = remaining.map((comic, index) =>
+        supabase.from('comics').update({ sort_order: index }).eq('id', comic.id)
+      )
+      Promise.all(updates)
+      dragItem.current = null
+      dragOverItem.current = null
+      return prev
+    })
   }
 
   async function fetchVotes() {
