@@ -98,6 +98,13 @@ export default function Home() {
               <button className="submit-btn" onClick={() => router.push('/vote?comic=' + encodeURIComponent(signedUpName))}>
                 View My Spot
               </button>
+              <button className="back-btn" onClick={() => {
+                localStorage.removeItem('be_rayted_comic_name')
+                localStorage.removeItem('be_rayted_session_id')
+                setAlreadySignedUp(false)
+                setSignedUpName('')
+                setRole('comic')
+              }}>Not you? Sign up again</button>
             </div>
           </div>
         ) : (
