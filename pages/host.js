@@ -18,13 +18,17 @@ export default function Host() {
   const dragOverItem = useRef(null)
 
   useEffect(() => {
-    const auth = localStorage.getItem('be_rayted_host_auth')
-    if (auth === 'true') setAuthenticated(true)
+    if (typeof window !== 'undefined') {
+      const auth = localStorage.getItem('be_rayted_host_auth')
+      if (auth === 'true') setAuthenticated(true)
+    }
   }, [])
 
   function handlePasswordSubmit() {
     if (passwordInput === HOST_PASSWORD) {
-      localStorage.setItem('be_rayted_host_auth', 'true')
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('be_rayted_host_auth', 'true')
+      }
       setAuthenticated(true)
     } else {
       setPasswordError(true)
