@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabase'
 import Head from 'next/head'
@@ -9,6 +9,35 @@ export default function Home() {
   const [name, setName] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [alreadySignedUp, setAlreadySignedUp] = useState(false)
+  const [signedUpName, setSignedUpName] = useState('')
+
+  useEffect(() => {
+    async function checkSignup() {
+      const existingName = localStorage.getItem('be_rayted_comic_name')
+      const existingSession = localStorage.getItem('be_rayted_session_id')
+      if (!existingName) return
+
+      // Check current session from Supabase
+      const { data } = await supabase
+        .from('settings')
+        .select('value')
+        .eq('key', 'session_id')
+        .single()
+
+      const currentSession = data?.value || 'default'
+
+      if (existingSession === currentSession) {
+        setAlreadySignedUp(true)
+        setSignedUpName(existingName)
+      } else {
+        // Session changed — clear stale signup
+        localStorage.removeItem('be_rayted_comic_name')
+        localStorage.removeItem('be_rayted_session_id')
+      }
+    }
+    checkSignup()
+  }, [])
 
   async function handleComicSubmit() {
     const trimmed = name.trim()
@@ -16,6 +45,12 @@ export default function Home() {
     setSubmitting(true)
     const { error } = await supabase.from('comics').insert({ name: trimmed, is_active: false })
     if (error) { setError('Something went wrong. Try again!'); setSubmitting(false); return }
+
+    // Get current session and save with signup
+    const { data } = await supabase.from('settings').select('value').eq('key', 'session_id').single()
+    const currentSession = data?.value || 'default'
+    localStorage.setItem('be_rayted_comic_name', trimmed)
+    localStorage.setItem('be_rayted_session_id', currentSession)
     router.push('/vote?comic=' + encodeURIComponent(trimmed))
   }
 
@@ -42,9 +77,26 @@ export default function Home() {
                 <span className="role-icon">👥</span>
                 <span className="role-text">Audience</span>
               </button>
-              <button className="role-btn" onClick={() => setRole('comic')}>
+              <button className="role-btn" onClick={() => {
+                if (alreadySignedUp) {
+                  router.push('/vote?comic=' + encodeURIComponent(signedUpName))
+                } else {
+                  setRole('comic')
+                }
+              }}>
                 <span className="role-icon">🎤</span>
                 <span className="role-text">Comic</span>
+              </button>
+            </div>
+          </div>
+        ) : alreadySignedUp ? (
+          <div className="card">
+            <div className="already-signed">
+              <div className="check-circle">✓</div>
+              <p className="card-label">You're already on the list!</p>
+              <p className="already-name">{signedUpName}</p>
+              <button className="submit-btn" onClick={() => router.push('/vote?comic=' + encodeURIComponent(signedUpName))}>
+                View My Spot
               </button>
             </div>
           </div>
@@ -176,7 +228,15 @@ export default function Home() {
           font-family: 'DM Sans', sans-serif;
           text-align: center;
         }
-        .back-btn:hover { color: #aaa; }
+        .already-signed { text-align: center; display: flex; flex-direction: column; gap: 0.75rem; align-items: center; }
+        .check-circle {
+          width: 55px; height: 55px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #ffaa00, #ff7700);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 1.4rem; font-weight: bold; color: #000;
+        }
+        .already-name { font-family: 'Bangers', cursive; font-size: 1.8rem; letter-spacing: 0.05em; color: #fff; }
       `}</style>
     </>
   )
