@@ -122,19 +122,20 @@ export default function Vote() {
 
   function getComicsAhead() {
     if (!comicName || allComics.length === 0) return null
-    const idx = allComics.findIndex(c => c.name.toLowerCase() === comicName.toLowerCase())
+    const remaining = allComics.filter(c => !c.has_performed)
+    const idx = remaining.findIndex(c => c.name.toLowerCase() === comicName.toLowerCase())
     if (idx === -1) return null
-    const ahead = allComics.slice(0, idx).filter(c => !c.is_active).length
-    return ahead
+    return idx // idx 0 = on stage, idx 1 = on deck, etc.
   }
 
   function getOnStage() {
-    return allComics.find(c => c.is_active) || null
+    const remaining = allComics.filter(c => !c.has_performed)
+    return remaining[0] || null
   }
 
   function getOnDeck() {
-    const remaining = allComics.filter(c => !c.has_performed && !c.is_active)
-    return remaining[0] || null
+    const remaining = allComics.filter(c => !c.has_performed)
+    return remaining[1] || null
   }
 
   const onStage = getOnStage()
@@ -225,14 +226,22 @@ export default function Vote() {
             {comicName && comicsAhead !== null && (
               <div className="counter-main">
                 {comicsAhead === 0
-                  ? "🎤 YOU'RE NEXT!"
+                  ? "🎤 YOU'RE UP!"
                   : `COMICS UNTIL YOU'RE UP: ${comicsAhead}`}
               </div>
             )}
-            <div className="counter-details">
-              {onStage && <span className="counter-info">🎤 On Stage: <strong>{onStage.name}</strong></span>}
-              {onDeck && (!comicName || onDeck.name.toLowerCase() !== comicName.toLowerCase()) && (
-                <span className="counter-info">⏭ On Deck: <strong>{onDeck.name}</strong></span>
+            <div className="counter-row">
+              {onStage && (
+                <div className="counter-col">
+                  <span className="counter-label">On Stage</span>
+                  <span className="counter-name">{onStage.name}</span>
+                </div>
+              )}
+              {onDeck && (
+                <div className="counter-col">
+                  <span className="counter-label">On Deck</span>
+                  <span className="counter-name">{onDeck.name}</span>
+                </div>
               )}
             </div>
           </div>
@@ -366,21 +375,30 @@ export default function Vote() {
           font-size: 1.3rem;
           letter-spacing: 0.1em;
           color: #ffaa00;
-          margin-bottom: 0.5rem;
+          margin-bottom: 0.6rem;
         }
-        .counter-details {
+        .counter-row {
+          display: flex;
+          justify-content: space-around;
+          gap: 0.5rem;
+        }
+        .counter-col {
           display: flex;
           flex-direction: column;
-          gap: 0.2rem;
+          align-items: center;
+          gap: 0.15rem;
+          flex: 1;
         }
-        .counter-info {
-          font-size: 0.8rem;
-          color: rgba(255,255,255,0.35);
-          letter-spacing: 0.03em;
+        .counter-label {
+          font-size: 0.65rem;
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
+          color: rgba(255,255,255,0.3);
         }
-        .counter-info strong {
+        .counter-name {
+          font-size: 0.85rem;
           color: rgba(255,255,255,0.55);
-          font-weight: 600;
+          font-weight: 500;
         }
         .spinner {
           width: 32px; height: 32px;
