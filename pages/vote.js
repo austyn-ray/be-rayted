@@ -76,21 +76,25 @@ export default function Vote() {
       const active = data.find(c => c.is_active)
 
       if (active) {
-        if (!activeComic || activeComic.id !== active.id) {
-          setActiveComic(active)
-          setSubmitted(false)
-          setAlreadyVoted(false)
-          setRating(null)
-
-          const { data: existingVote } = await supabase
-            .from('votes')
-            .select('id')
-            .eq('comic_id', active.id)
-            .eq('respondent_id', respondentId)
-            .single()
-
-          if (existingVote) setAlreadyVoted(true)
-        }
+        setActiveComic(prev => {
+          if (!prev || prev.id !== active.id) {
+            // New comic became active — reset voting state
+            setSubmitted(false)
+            setAlreadyVoted(false)
+            setRating(null)
+            // Check if this device already voted for the new comic
+            supabase
+              .from('votes')
+              .select('id')
+              .eq('comic_id', active.id)
+              .eq('respondent_id', respondentId)
+              .single()
+              .then(({ data: existingVote }) => {
+                if (existingVote) setAlreadyVoted(true)
+              })
+          }
+          return active
+        })
       } else {
         setActiveComic(null)
       }
