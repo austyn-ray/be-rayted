@@ -2,12 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import Head from 'next/head'
 
-const HOST_PASSWORD = 'Comedy123'
-
 export default function Host() {
-  const [authenticated, setAuthenticated] = useState(false)
-  const [passwordInput, setPasswordInput] = useState('')
-  const [passwordError, setPasswordError] = useState(false)
   const [comics, setComics] = useState([])
   const [votes, setVotes] = useState([])
   const [newComicName, setNewComicName] = useState('')
@@ -16,84 +11,6 @@ export default function Host() {
   const [confirmClear, setConfirmClear] = useState(false)
   const dragItem = useRef(null)
   const dragOverItem = useRef(null)
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const auth = localStorage.getItem('be_rayted_host_auth')
-      if (auth === 'true') setAuthenticated(true)
-    }
-  }, [])
-
-  function handlePasswordSubmit() {
-    if (passwordInput === HOST_PASSWORD) {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('be_rayted_host_auth', 'true')
-      }
-      setAuthenticated(true)
-    } else {
-      setPasswordError(true)
-      setPasswordInput('')
-    }
-  }
-
-  if (!authenticated) {
-    return (
-      <>
-        <Head>
-          <title>Be Rayted — Host</title>
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <link href="https://fonts.googleapis.com/css2?family=Bangers&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-        </Head>
-        <div className="auth-container">
-          <img src="/logo.png" alt="Be Rayted" className="auth-logo" />
-          <div className="auth-card">
-            <p className="auth-label">Host Access</p>
-            <input
-              className="auth-input"
-              type="password"
-              placeholder="Enter password..."
-              value={passwordInput}
-              onChange={e => { setPasswordInput(e.target.value); setPasswordError(false) }}
-              onKeyDown={e => e.key === 'Enter' && handlePasswordSubmit()}
-              autoFocus
-            />
-            {passwordError && <p className="auth-error">Incorrect password!</p>}
-            <button className="auth-btn" onClick={handlePasswordSubmit}>Enter</button>
-          </div>
-        </div>
-        <style jsx global>{`
-          * { box-sizing: border-box; margin: 0; padding: 0; }
-          body { background: #0a0a0a; min-height: 100vh; font-family: 'DM Sans', sans-serif; color: #fff; }
-          .auth-container {
-            max-width: 400px; margin: 0 auto; padding: 2rem 1.5rem;
-            min-height: 100vh; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; gap: 1.5rem;
-          }
-          .auth-logo { width: 160px; height: auto; }
-          .auth-card {
-            width: 100%; background: #141414; border: 1px solid #222;
-            border-radius: 1rem; padding: 2rem; display: flex;
-            flex-direction: column; gap: 1rem;
-          }
-          .auth-label { font-family: 'Bangers', cursive; font-size: 1.3rem; letter-spacing: 0.08em; color: #ffaa00; text-align: center; }
-          .auth-input {
-            width: 100%; background: #1e1e1e; border: 2px solid #2a2a2a;
-            border-radius: 0.6rem; color: #fff; font-family: 'DM Sans', sans-serif;
-            font-size: 1rem; padding: 0.75rem 1rem; outline: none; text-align: center;
-          }
-          .auth-input:focus { border-color: #ffaa00; }
-          .auth-error { color: #ff4444; font-size: 0.85rem; text-align: center; }
-          .auth-btn {
-            width: 100%; padding: 0.85rem;
-            background: linear-gradient(135deg, #ffaa00, #ff7700);
-            border: none; border-radius: 0.6rem; color: #000;
-            font-family: 'Bangers', cursive; font-size: 1.1rem;
-            letter-spacing: 0.08em; cursor: pointer;
-          }
-        `}</style>
-      </>
-    )
-  }
 
   useEffect(() => {
     fetchAll()
