@@ -32,7 +32,7 @@ export default function Home() {
           <img src="/logo.png" alt="Be Rayted" className="logo" />
         </div>
 
-        <p className="tagline">COME GET BERATED OR BE RATED</p>
+        <p className="tagline">Don't Get Berated.....BE RAYTED!</p>
 
         {!role ? (
           <div className="card">
