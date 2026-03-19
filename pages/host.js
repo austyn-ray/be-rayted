@@ -99,6 +99,9 @@ export default function Host() {
   async function clearNight() {
     await supabase.from('votes').delete().neq('id', 0)
     await supabase.from('comics').delete().neq('id', 0)
+    // Bump session so previous comic sign-ups are invalidated
+    const newSession = Date.now().toString()
+    await supabase.from('settings').upsert({ key: 'session_id', value: newSession })
     setConfirmClear(false)
   }
 
