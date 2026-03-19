@@ -77,13 +77,7 @@ export default function Home() {
                 <span className="role-icon">👥</span>
                 <span className="role-text">Audience</span>
               </button>
-              <button className="role-btn" onClick={() => {
-                if (alreadySignedUp) {
-                  router.push('/vote?comic=' + encodeURIComponent(signedUpName))
-                } else {
-                  setRole('comic')
-                }
-              }}>
+              <button className="role-btn" onClick={() => setRole('comic')}>
                 <span className="role-icon">🎤</span>
                 <span className="role-text">Comic</span>
               </button>
@@ -103,7 +97,6 @@ export default function Home() {
                 localStorage.removeItem('be_rayted_session_id')
                 setAlreadySignedUp(false)
                 setSignedUpName('')
-                setRole('comic')
               }}>Not you? Sign up again</button>
             </div>
           </div>
