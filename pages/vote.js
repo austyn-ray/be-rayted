@@ -133,9 +133,8 @@ export default function Vote() {
   }
 
   function getOnDeck() {
-    const activeIdx = allComics.findIndex(c => c.is_active)
-    if (activeIdx === -1) return allComics[0] || null
-    return allComics[activeIdx + 1] || null
+    const remaining = allComics.filter(c => !c.has_performed && !c.is_active)
+    return remaining[0] || null
   }
 
   const onStage = getOnStage()
@@ -221,16 +220,18 @@ export default function Vote() {
           )}
         </div>
 
-        {comicName && comicsAhead !== null && (
+        {(onStage || onDeck) && (
           <div className="counter-banner">
-            <div className="counter-main">
-              {comicsAhead === 0
-                ? "🎤 YOU'RE NEXT!"
-                : `COMICS UNTIL YOU'RE UP: ${comicsAhead}`}
-            </div>
+            {comicName && comicsAhead !== null && (
+              <div className="counter-main">
+                {comicsAhead === 0
+                  ? "🎤 YOU'RE NEXT!"
+                  : `COMICS UNTIL YOU'RE UP: ${comicsAhead}`}
+              </div>
+            )}
             <div className="counter-details">
               {onStage && <span className="counter-info">🎤 On Stage: <strong>{onStage.name}</strong></span>}
-              {onDeck && onDeck.name.toLowerCase() !== comicName.toLowerCase() && (
+              {onDeck && (!comicName || onDeck.name.toLowerCase() !== comicName.toLowerCase()) && (
                 <span className="counter-info">⏭ On Deck: <strong>{onDeck.name}</strong></span>
               )}
             </div>
