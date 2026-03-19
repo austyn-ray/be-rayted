@@ -124,6 +124,19 @@ export default function Vote() {
     return ahead
   }
 
+  function getOnStage() {
+    return allComics.find(c => c.is_active) || null
+  }
+
+  function getOnDeck() {
+    const activeIdx = allComics.findIndex(c => c.is_active)
+    if (activeIdx === -1) return allComics[0] || null
+    return allComics[activeIdx + 1] || null
+  }
+
+  const onStage = getOnStage()
+  const onDeck = getOnDeck()
+
   const comicsAhead = getComicsAhead()
 
   return (
@@ -206,9 +219,17 @@ export default function Vote() {
 
         {comicName && comicsAhead !== null && (
           <div className="counter-banner">
-            {comicsAhead === 0
-              ? "🎤 YOU'RE NEXT!"
-              : `COMICS UNTIL YOU'RE UP: ${comicsAhead}`}
+            <div className="counter-main">
+              {comicsAhead === 0
+                ? "🎤 YOU'RE NEXT!"
+                : `COMICS UNTIL YOU'RE UP: ${comicsAhead}`}
+            </div>
+            <div className="counter-details">
+              {onStage && <span className="counter-info">🎤 On Stage: <strong>{onStage.name}</strong></span>}
+              {onDeck && onDeck.name.toLowerCase() !== comicName.toLowerCase() && (
+                <span className="counter-info">⏭ On Deck: <strong>{onDeck.name}</strong></span>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -332,12 +353,29 @@ export default function Vote() {
           background: #1a1a1a;
           border: 2px solid #ffaa00;
           border-radius: 1rem;
-          padding: 1rem;
+          padding: 0.85rem 1rem;
           text-align: center;
+        }
+        .counter-main {
           font-family: 'Bangers', cursive;
-          font-size: 1.4rem;
+          font-size: 1.3rem;
           letter-spacing: 0.1em;
           color: #ffaa00;
+          margin-bottom: 0.5rem;
+        }
+        .counter-details {
+          display: flex;
+          flex-direction: column;
+          gap: 0.2rem;
+        }
+        .counter-info {
+          font-size: 0.8rem;
+          color: rgba(255,255,255,0.35);
+          letter-spacing: 0.03em;
+        }
+        .counter-info strong {
+          color: rgba(255,255,255,0.55);
+          font-weight: 600;
         }
         .spinner {
           width: 32px; height: 32px;
