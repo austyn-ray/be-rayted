@@ -62,6 +62,7 @@ export default function Vote() {
     const { data } = await supabase
       .from('comics')
       .select('*')
+      .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true })
 
     if (data) {
