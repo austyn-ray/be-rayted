@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import Head from 'next/head'
 
@@ -9,6 +9,8 @@ export default function Host() {
   const [loading, setLoading] = useState(true)
   const [activeComic, setActiveComic] = useState(null)
   const [confirmClear, setConfirmClear] = useState(false)
+  const dragItem = useRef(null)
+  const dragOverItem = useRef(null)
 
   useEffect(() => {
     fetchAll()
@@ -35,12 +37,35 @@ export default function Host() {
   }
 
   async function fetchComics() {
-    const { data } = await supabase.from('comics').select('*').order('created_at', { ascending: true })
+    const { data } = await supabase.from('comics').select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: true })
     if (data) {
       setComics(data)
       const active = data.find(c => c.is_active)
       setActiveComic(active || null)
     }
+  }
+
+  function handleDragStart(index) {
+    dragItem.current = index
+  }
+
+  function handleDragEnter(index) {
+    dragOverItem.current = index
+    const newComics = [...comics]
+    const draggedItem = newComics.splice(dragItem.current, 1)[0]
+    newComics.splice(index, 0, draggedItem)
+    dragItem.current = index
+    setComics(newComics)
+  }
+
+  async function handleDragEnd() {
+    // Save new order to Supabase
+    const updates = comics.map((comic, index) =>
+      supabase.from('comics').update({ sort_order: index }).eq('id', comic.id)
+    )
+    await Promise.all(updates)
+    dragItem.current = null
+    dragOverItem.current = null
   }
 
   async function fetchVotes() {
@@ -153,7 +178,16 @@ export default function Host() {
                 const { avg, count } = getComicStats(comic.id)
                 const isActive = comic.is_active
                 return (
-                  <div key={comic.id} className={`comic-row ${isActive ? 'active' : ''}`}>
+                  <div
+                    key={comic.id}
+                    className={`comic-row ${isActive ? 'active' : ''}`}
+                    draggable
+                    onDragStart={() => handleDragStart(index)}
+                    onDragEnter={() => handleDragEnter(index)}
+                    onDragEnd={handleDragEnd}
+                    onDragOver={e => e.preventDefault()}
+                  >
+                    <span className="drag-handle">⠿</span>
                     <div className="comic-info">
                       <span className="comic-number">{index + 1}</span>
                       <span className="comic-name">{comic.name}</span>
@@ -290,7 +324,10 @@ export default function Host() {
           align-items: center;
           gap: 0.75rem;
           transition: border-color 0.2s;
+          cursor: grab;
         }
+        .comic-row:active { cursor: grabbing; }
+        .drag-handle { color: #444; font-size: 1.2rem; user-select: none; flex-shrink: 0; }
         .comic-row.active { border-color: #ffaa00; background: rgba(255,170,0,0.05); }
         .comic-info { display: flex; align-items: center; gap: 0.6rem; flex: 1; min-width: 0; }
         .comic-number { color: #444; font-size: 0.8rem; min-width: 1.2rem; }
