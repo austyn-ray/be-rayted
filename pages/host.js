@@ -81,9 +81,10 @@ export default function Host() {
   }
 
   async function activateComic(comic) {
-    // Deactivate all first
+    // Deactivate all first, marking active one as performed
+    await supabase.from('comics').update({ is_active: false, has_performed: true }).eq('is_active', true)
     await supabase.from('comics').update({ is_active: false }).neq('id', 0)
-    // Activate selected
+    // Activate selected — preserve has_performed status
     await supabase.from('comics').update({ is_active: true }).eq('id', comic.id)
   }
 
@@ -172,80 +173,77 @@ export default function Host() {
           </div>
         </div>
 
-        <div className="section">
-          <h2 className="section-title">Remaining Comics</h2>
-          {loading ? (
-            <div className="empty">Loading...</div>
-          ) : comics.filter(c => !c.has_performed).length === 0 ? (
-            <div className="empty">No comics remaining.</div>
-          ) : (
-            <div className="comic-list">
-              {comics.filter(c => !c.has_performed).map((comic, index) => {
-                const { avg, count } = getComicStats(comic.id)
-                const isActive = comic.is_active
-                return (
-                  <div
-                    key={comic.id}
-                    className={`comic-row ${isActive ? 'active' : ''}`}
-                    draggable
-                    onDragStart={() => handleDragStart(index)}
-                    onDragEnter={() => handleDragEnter(index)}
-                    onDragEnd={handleDragEnd}
-                    onDragOver={e => e.preventDefault()}
-                  >
-                    <span className="drag-handle">⠿</span>
-                    <div className="comic-info">
-                      <span className="comic-number">{index + 1}</span>
-                      <span className="comic-name">{comic.name}</span>
-                      {isActive && <span className="live-badge">LIVE</span>}
+        <div className="two-col">
+          <div className="section">
+            <h2 className="section-title">Remaining</h2>
+            {loading ? (
+              <div className="empty">Loading...</div>
+            ) : comics.filter(c => !c.has_performed).length === 0 ? (
+              <div className="empty">No comics remaining.</div>
+            ) : (
+              <div className="comic-list">
+                {comics.filter(c => !c.has_performed).map((comic, index) => {
+                  const { avg, count } = getComicStats(comic.id)
+                  const isActive = comic.is_active
+                  return (
+                    <div
+                      key={comic.id}
+                      className={`comic-row ${isActive ? 'active' : ''}`}
+                      draggable
+                      onDragStart={() => handleDragStart(index)}
+                      onDragEnter={() => handleDragEnter(index)}
+                      onDragEnd={handleDragEnd}
+                      onDragOver={e => e.preventDefault()}
+                    >
+                      <span className="drag-handle">⠿</span>
+                      <div className="comic-info">
+                        <span className="comic-number">{index + 1}</span>
+                        <span className="comic-name">{comic.name}</span>
+                        {isActive && <span className="live-badge">LIVE</span>}
+                      </div>
+                      <div className="comic-actions">
+                        {!isActive ? (
+                          <button className="btn-activate" onClick={() => activateComic(comic)}>▶</button>
+                        ) : (
+                          <button className="btn-deactivate" onClick={deactivateAll}>■</button>
+                        )}
+                        <button className="btn-delete" onClick={() => deleteComic(comic.id)}>✕</button>
+                      </div>
                     </div>
-                    <div className="comic-stats">
-                      <span className="stat">{avg} avg</span>
-                      <span className="stat-count">{count} votes</span>
-                    </div>
-                    <div className="comic-actions">
-                      {!isActive ? (
-                        <button className="btn-activate" onClick={() => activateComic(comic)}>
-                          Open Voting
-                        </button>
-                      ) : (
-                        <button className="btn-deactivate" onClick={deactivateAll}>
-                          Close
-                        </button>
-                      )}
-                      <button className="btn-delete" onClick={() => deleteComic(comic.id)}>✕</button>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
 
-        {comics.filter(c => c.has_performed).length > 0 && (
           <div className="section">
             <h2 className="section-title">🏆 Leaderboard</h2>
-            <div className="comic-list">
-              {comics
-                .filter(c => c.has_performed)
-                .map(c => ({ ...c, ...getComicStats(c.id) }))
-                .sort((a, b) => parseFloat(b.avg) - parseFloat(a.avg))
-                .map((comic, index) => (
-                  <div key={comic.id} className={`comic-row performed ${index === 0 ? 'leader' : ''}`}>
-                    <span className="rank">#{index + 1}</span>
-                    <div className="comic-info">
-                      <span className="comic-name">{comic.name}</span>
+            {comics.filter(c => c.has_performed).length === 0 ? (
+              <div className="empty">No one performed yet.</div>
+            ) : (
+              <div className="comic-list">
+                {comics
+                  .filter(c => c.has_performed)
+                  .map(c => ({ ...c, ...getComicStats(c.id) }))
+                  .sort((a, b) => parseFloat(b.avg) - parseFloat(a.avg))
+                  .map((comic, index) => (
+                    <div key={comic.id} className={`comic-row performed ${index === 0 ? 'leader' : ''}`}>
+                      <span className="rank">#{index + 1}</span>
+                      <div className="comic-info">
+                        <span className="comic-name">{comic.name}</span>
+                      </div>
+                      <div className="comic-stats">
+                        <span className="stat">{comic.avg}</span>
+                        <span className="stat-count">{comic.count}v</span>
+                      </div>
+                      <button className="btn-reopen" onClick={() => activateComic(comic)} title="Reopen voting">↺</button>
+                      <button className="btn-delete" onClick={() => deleteComic(comic.id)}>✕</button>
                     </div>
-                    <div className="comic-stats">
-                      <span className="stat">{comic.avg} avg</span>
-                      <span className="stat-count">{comic.count} votes</span>
-                    </div>
-                    <button className="btn-delete" onClick={() => deleteComic(comic.id)}>✕</button>
-                  </div>
-                ))}
-            </div>
+                  ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
 
         {!confirmClear ? (
           <button className="btn-clear" onClick={() => setConfirmClear(true)}>Clear Night & Start Fresh</button>
@@ -358,7 +356,22 @@ export default function Host() {
           cursor: grab;
         }
         .comic-row:active { cursor: grabbing; }
-        .comic-row.performed { opacity: 0.8; cursor: default; }
+        .two-col {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+          width: 100%;
+        }
+        .btn-reopen {
+          background: rgba(255,170,0,0.15);
+          border: 1px solid rgba(255,170,0,0.3);
+          color: #ffaa00;
+          border-radius: 0.5rem;
+          padding: 0.35rem 0.5rem;
+          font-size: 0.85rem;
+          cursor: pointer;
+        }
+        .btn-reopen:hover { background: rgba(255,170,0,0.25); }
         .comic-row.leader { border-color: #ffaa00; background: rgba(255,170,0,0.08); opacity: 1; }
         .rank { font-family: 'Bangers', cursive; font-size: 1.1rem; color: #ffaa00; min-width: 1.8rem; }
         .comic-row.active { border-color: #ffaa00; background: rgba(255,170,0,0.05); }
