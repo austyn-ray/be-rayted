@@ -88,6 +88,9 @@ export default function Host() {
   }
 
   async function deactivateAll() {
+    // Mark currently active comic as performed
+    await supabase.from('comics').update({ is_active: false, has_performed: true }).eq('is_active', true)
+    // Deactivate any others just in case
     await supabase.from('comics').update({ is_active: false }).neq('id', 0)
   }
 
@@ -170,14 +173,14 @@ export default function Host() {
         </div>
 
         <div className="section">
-          <h2 className="section-title">Tonight's Lineup</h2>
+          <h2 className="section-title">Remaining Comics</h2>
           {loading ? (
             <div className="empty">Loading...</div>
-          ) : comics.length === 0 ? (
-            <div className="empty">No comics added yet.</div>
+          ) : comics.filter(c => !c.has_performed).length === 0 ? (
+            <div className="empty">No comics remaining.</div>
           ) : (
             <div className="comic-list">
-              {comics.map((comic, index) => {
+              {comics.filter(c => !c.has_performed).map((comic, index) => {
                 const { avg, count } = getComicStats(comic.id)
                 const isActive = comic.is_active
                 return (
@@ -218,6 +221,31 @@ export default function Host() {
             </div>
           )}
         </div>
+
+        {comics.filter(c => c.has_performed).length > 0 && (
+          <div className="section">
+            <h2 className="section-title">🏆 Leaderboard</h2>
+            <div className="comic-list">
+              {comics
+                .filter(c => c.has_performed)
+                .map(c => ({ ...c, ...getComicStats(c.id) }))
+                .sort((a, b) => parseFloat(b.avg) - parseFloat(a.avg))
+                .map((comic, index) => (
+                  <div key={comic.id} className={`comic-row performed ${index === 0 ? 'leader' : ''}`}>
+                    <span className="rank">#{index + 1}</span>
+                    <div className="comic-info">
+                      <span className="comic-name">{comic.name}</span>
+                    </div>
+                    <div className="comic-stats">
+                      <span className="stat">{comic.avg} avg</span>
+                      <span className="stat-count">{comic.count} votes</span>
+                    </div>
+                    <button className="btn-delete" onClick={() => deleteComic(comic.id)}>✕</button>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
 
         {!confirmClear ? (
           <button className="btn-clear" onClick={() => setConfirmClear(true)}>Clear Night & Start Fresh</button>
@@ -330,7 +358,9 @@ export default function Host() {
           cursor: grab;
         }
         .comic-row:active { cursor: grabbing; }
-        .drag-handle { color: #444; font-size: 1.2rem; user-select: none; flex-shrink: 0; }
+        .comic-row.performed { opacity: 0.8; cursor: default; }
+        .comic-row.leader { border-color: #ffaa00; background: rgba(255,170,0,0.08); opacity: 1; }
+        .rank { font-family: 'Bangers', cursive; font-size: 1.1rem; color: #ffaa00; min-width: 1.8rem; }
         .comic-row.active { border-color: #ffaa00; background: rgba(255,170,0,0.05); }
         .comic-info { display: flex; align-items: center; gap: 0.6rem; flex: 1; min-width: 0; }
         .comic-number { color: #444; font-size: 0.8rem; min-width: 1.2rem; }
